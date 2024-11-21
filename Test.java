@@ -6,9 +6,14 @@ public class Test {
 		String csvFile = "dataset.csv";
 		String stopFile = "stop.txt";
 		BasicIndex BI = new BasicIndex();
-		BI.readCsv(csvFile, stopFile);
-		//BI.printtt();
 		
+
+		String qurey = " business world market";
+		BI.readCsv(csvFile, stopFile);
+		BI.addScore(qurey);
+		
+		//BI.printtt();
+		/* 
 		int count = 1;
 		System.out.println("----------------------------------");
 		LinkedList<String> result = BI.BR("market OR sports");
@@ -17,6 +22,8 @@ public class Test {
 			System.out.println("Result ID:" + count++ + " ---> " + result.retrieve());
 			result.findNext();
 }
-		System.out.println("Result ID:" + count++ + " ---> " + result.retrieve());
+		System.out.println("Result ID:" + count++ + " ---> " + result.retrieve());*/
+
+
 	}
 }
