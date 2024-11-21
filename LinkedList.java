@@ -1,75 +1,65 @@
 
-public class LinkedList<T> implements List<T> {
-	private IDNode<T> head;
-	private IDNode<T> current;
-	
-	public String prints() {
-		return current.details();
-	}
-	public LinkedList() {
-		head = current = null;
+public class LinkedStack<T> implements Stack<T> {
+	private Node<T> top;
+
+	public LinkedStack() {
+		top = null;
 	}
 
-	public void findFirst() {
-		if (!empty())
-			current = head;
+	@Override
+	public T pop() {
+		T e = top.data;
+		top = top.next;
+		return e;
 	}
 
-	public void findNext() {
-		if (!empty() && !last()) {
-			current = current.next;
-		}
+	@Override
+	public void push(T e) {
+		Node<T> tmp = new Node<T>(e);
+		tmp.next = top;
+		top = tmp;
 	}
 
-	public String retrieve() {
-		if (current != null)
-		    return current.ID;	
-		return null;
-	}
-	public LinkedList<T> retrieveList() {
-	    if (current != null) {
-	        return current.words;
-	    }
-	    throw new IllegalStateException("NO node selected.");
-	}
-
-	public void insert(String e) {
-		IDNode<T> tmp1;
-		if (empty()) {
-			current = head = new IDNode<T>(e);
-		} else {
-			tmp1 = new IDNode<T>(e);
-			tmp1.next = current.next;
-			current.next = tmp1;
-			findNext();
-		}
-	}
-	public void addWords(LinkedList<String> w) {
-	current.words = (LinkedList<T>) w;  
-	}
-	public void addList(LinkedList<String> tempAndList) {
-		IDNode<String> tmp = tempAndList.head;
-		while (tmp != null) {
-			insert(tmp.ID);
-			tmp = tmp.next;
-		}
-		
-	}
-
+	@Override
 	public boolean empty() {
-		if (head == null)
-			return true;
-		return false;
+		return top==null;
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+	       // if (this == o) return true;
+	        if (o == null || getClass() != o.getClass()) return false;
+	        if(top == null) return false;
+	        Stack<T> otherStack = (Stack<T>) o;
 
-	public boolean last() {
-		if(current == null) {
-			System.out.println("current is null and you calles last");
-			return true;
-		}
-		if (current.next == null) {
-			return true;
-		}
+	        // Check if each element is equal (in the same order)
+	        Node<T> tmp = top;
+	        T e;
+	      
+	        Stack<T> tmpStack = new LinkedStack<>();
+	        while(tmp != null) {	
+	        	if(!otherStack.empty()) { 
+	        		e  = otherStack.pop();
+	        		tmpStack.push(e);
+	        		if (!tmp.data.equals(e)) { 
+	        			while(!tmpStack.empty()) otherStack.push(tmpStack.pop());
+	        			return false;
+	        		}
+	        		tmp = tmp.next;
+	        	}
+	        	else {
+	        		while(!tmpStack.empty()) otherStack.push(tmpStack.pop());
+        			return false;
+	        	}
+	        }
+	        
+	        while(!tmpStack.empty()) otherStack.push(tmpStack.pop());
+	        return true;
+	 }
+	
+	
+	@Override
+	public boolean full() {
 		return false;
 	}
 }
