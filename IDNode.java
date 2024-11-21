@@ -1,6 +1,7 @@
 public class IDNode<T> { 
 	public String ID;
 	public LinkedList<T> words;
+	public int score;
 	public IDNode<T> next;
 
 	public IDNode() {
@@ -12,8 +13,10 @@ public class IDNode<T> {
 	public IDNode(String val) {
 		ID = val;
 		next = null;
+		score = -1;
 		words = new LinkedList<>();
 	}
+
     public String details() {
     	String A = "";
     	
@@ -26,3 +29,4 @@ public class IDNode<T> {
         return "ID: " + ID + ", Words: " + A;
     }
 }
+
