@@ -8,6 +8,21 @@ public class BasicIndex {
 	public BasicIndex() {
 	    list = new LinkedList<>();
 	}
+
+	public class DocumentScore {
+		public String docId; // The ID of the document
+		public int score; // The score of the document
+	
+		// Constructor to initialize docId and score
+		public DocumentScore(String docId, int score) {
+			this.docId = docId;
+			this.score = score;
+		}
+	}
+		
+
+
+
 	public void printtt() {
 		list.findFirst();
 		while(!list.last()) {
@@ -285,5 +300,108 @@ public class BasicIndex {
 		}
 		return termStack.pop();
 	}
+
+	
+
+
+
+	// " Door apple"
+	// [Door,apple]
+
+	
+	public void addScore(String query) { // query -> "market sports" 
+		String[] queryArray = query.split(" ");
+		int score = 0;
+        list.findFirst(); 				// [0 , 1,  2 ,3]
+		
+		LinkedList<String>[] storeScores = new LinkedList[50];    // problem of the size!
+		int storeScoresCounter = -1;
+
+
+		
+		System.out.println("\n"+"--add Score method--");
+
+		while(!list.last()) {
+			
+            LinkedList<String> innerList = list.retrieveList(); //retrive words list for a documeant
+            innerList.findFirst();
+            
+			while(!innerList.last()) { 		// door , apple
+                score  = 0;
+
+                for(String terms: queryArray) { // [market , sports, ]
+					//System.out.println("Checking term: " + terms + " against: " + innerList.retrieve());
+					
+					if(terms.equalsIgnoreCase(innerList.retrieve())){
+                        score++;
+						//System.out.println("Match found! Incremented score to: " + score);
+					}
+                }			
+                list.addScore(score);			
+                innerList.findNext();
+				
+            }
+
+		
+			if(list.retrieveScore()>0){
+				storeScoresCounter++;
+				storeScores[storeScoresCounter] = list;	
+				
+				if (list != null) { // Check if the LinkedList is not null
+					System.out.println("-[New]--List numberID: "+ list.retrieve()+" , "+"Score: "+list.retrieveScore());
+					System.out.println("--------List numberID: "+ storeScores[storeScoresCounter].retrieve()+" , "+"Score: "+storeScores[storeScoresCounter].retrieveScore());
+				
+			}
+			
+		}//End of word loop
+
+            list.findNext();
+
+			
+        
+		}//End of doc loop
+		
+
+		
+		for (int i = 0; i < storeScoresCounter; i++) {
+           // StoreScoresAsNum[i] = storeScores[i].retrieveScore();  // Copying each LinkedList object
+        }
+		System.out.println("See me?");
+
+		for (int i = 0; i < storeScoresCounter; i++) {
+           // System.out.print(StoreScoresAsNum[i]);
+        }
+		
+		//System.out.println(findMaxScore(storeScores));
+
+	}
+	
+	
+
+	public static int findMaxScore(LinkedList<String>[] listArray) {
+        int max = listArray[0].retrieveScore();
+
+        for (int i = 1; i < listArray.length; i++) {
+            if (listArray[i].retrieveScore() > max) {
+                max = listArray[i].retrieveScore();
+            }
+        }
+        return max;}
+
+
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
