@@ -105,6 +105,134 @@ public class InvertedIndexBST {
 		return stopArr;
 
 	}
+	public LinkedList<String> BR(String query) {
+		LinkedStack<String> operatorStack = new LinkedStack<String>();
+		LinkedStack<LinkedList<String>> termStack = new LinkedStack<LinkedList<String>>();
+		LinkedList<String> result = new LinkedList<String>();
+		String words[] = query.split(" ");
+
+		for (String term : words) { // market or sports and warming or CSC
+			if (!(term.equals("AND") || term.equals("OR"))) {
+				tree.findkey(term); 
+				termStack.push(tree.retrieveList());
+			} else if (term.equals("OR")) {
+				while (!operatorStack.empty()) {
+					String data = operatorStack.pop();
+					if (data.equals("AND")) {
+						LinkedList<String> term1 = termStack.pop();
+						LinkedList<String> term2 = termStack.pop();
+						termStack.push(andQuery(term1, term2));
+					} else {
+						operatorStack.push(data); // It's an "OR" operator (same precedence)
+						break;
+					}
+				} 
+				operatorStack.push("OR");
+			} else if (term.equals("AND")) {
+				operatorStack.push("AND");
+			}
+		}
+		// Process remaining operators in the stack
+		while (!operatorStack.empty()) {
+			String operator = operatorStack.pop();
+			LinkedList<String> IDS1 = termStack.pop();
+			LinkedList<String> IDS2 = termStack.pop();
+			if (operator.equals("AND")) {
+				result = andQuery(IDS1, IDS2);
+			} else {
+				result = orQuery(IDS1, IDS2);
+			}
+			termStack.push(result);
+		}
+		return termStack.pop();
+	}
+	
+	public LinkedList<String> andQuery(LinkedList<String> l1, LinkedList<String> l2) { // check generics !!!!
+		LinkedList<String> interSection = new LinkedList<String>();
+
+		l1.findFirst();
+		while (!l1.last()) {
+			l2.findFirst();
+			while (!l2.last()) {
+				if (l1.retrieve().equals(l2.retrieve())) {
+					interSection.insert(l1.retrieve());
+					break;
+				}
+				l2.findNext();
+			}
+			l1.findNext();
+		}
+		l2.findFirst();
+		while (!l2.last()) {
+			if (l1.retrieve().equals(l2.retrieve()))
+				interSection.insert(l1.retrieve());
+			l2.findNext();
+		}
+		l1.findFirst();
+		while (!l1.last()) {
+			if (l1.retrieve().equals(l2.retrieve())) {
+				interSection.insert(l2.retrieve());
+			}
+			l1.findNext();
+		}
+		if (l1.retrieve().equals(l2.retrieve()))
+			interSection.insert(l2.retrieve());
+
+		return interSection;
+	}
+
+	public LinkedList<String> orQuery(LinkedList<String> l1, LinkedList<String> l2) {
+		LinkedList<String> result = new LinkedList<String>();
+		l1.findFirst();
+		while (!l1.last()) {
+			result.insert(l1.retrieve());
+			l1.findNext();
+		}
+		result.insert(l1.retrieve());
+
+		l1.findFirst();
+		l2.findFirst();
+
+		while (!l2.last()) {
+			boolean isFound = false;
+
+			l1.findFirst();
+
+			while (!l1.last()) {
+				if (l1.retrieve().equals(l2.retrieve())) {
+					isFound = true;
+					break;
+				}
+				l1.findNext();
+			}
+
+			if (l1.retrieve().equals(l2.retrieve())) {
+				isFound = true;
+			}
+
+			if (!isFound) {
+				result.insert(l2.retrieve());
+			}
+
+			l2.findNext();
+		}
+
+		boolean isFound = false;
+		l1.findFirst();
+		while (!l1.last()) {
+			if (l1.retrieve().equals(l2.retrieve())) {
+				isFound = true;
+				break;
+			}
+			l1.findNext();
+		}
+		if (!isFound && !l1.retrieve().equals(l2.retrieve())) {
+			result.insert(l2.retrieve());
+		}
+
+		result.findFirst();
+		return result;
+	}
 	public void printTree() {
 	    if (tree == null || tree.empty()) {
 	        System.out.println("The tree is empty.");
