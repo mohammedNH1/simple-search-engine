@@ -1,13 +1,14 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 
 public class InvertedIndexBST {
 	private BST<String> tree; 
-
 	public InvertedIndexBST() {
 	        tree = new BST<String>();
+	        
 	    }
-	public void readCsv(String file, String stop) {
+	public void readCsv(String file, String stop)  {
 		boolean isDuplicate;
 		BufferedReader reader = null;
 		String ID = "";
@@ -21,16 +22,18 @@ public class InvertedIndexBST {
 				String[] row = line.split(",", 2);
 				int count = 0;
 				for (String index : row) {
-					index = index.toLowerCase();
-					if (index.equals("")) {
+					index = index.trim().toLowerCase();
+					if (index.isEmpty()) {
 						break;
 					}
 					index = index.replaceAll("[^a-zA-Z0-9\\s]", "");
 					if (count++ % 2 == 0) {
+						
 						 ID = index;
 					} else {
 						res = index.split(" ");
 						for (String indx : res) {
+
 							isDuplicate = false;
 							String word = indx.toLowerCase();
 							if(tree.findkey(word)) { // you found it
@@ -47,31 +50,28 @@ public class InvertedIndexBST {
 								if(currentList.retrieve().equals(ID))
 									isDuplicate = true;
 									if(isDuplicate) {
-								continue;  // since it is in BST and it is in list of bst then continue
+								continue;  
 							}
 									else {
 										tree.insertToList(ID);
 									}
 							}
-							
 							for (int i = 0; i < stopWords.length; i++) {
 								if (word.equals(stopWords[i])) {
 									isStop = true;
 									break;
 								}
 							}
-							if (!isStop && !isDuplicate) { // && !isDuplicate not necessary since we checked before
+							if (!isStop && !isDuplicate) {
 								LinkedList<String> List = new LinkedList<String>();
 								List.insert(ID);
-								tree.insert(indx , List); 
+								tree.insert(indx , List); 		
 							}
 							isStop = false;
-						}
-						
+						}	
 					}
-					
 				}
-			} // end of while
+			} 
 		}catch(Exception e) {
 			System.out.println(e);
 		}	
@@ -233,35 +233,89 @@ public class InvertedIndexBST {
 		result.findFirst();
 		return result;
 	}
-	public void printTree() {
-	    if (tree == null || tree.empty()) {
-	        System.out.println("The tree is empty.");
-	        return;
-	    }
-	    System.out.println("Inverted Index Tree (In-Order Traversal):");
-	    printTree(tree.root); // Start from the root of the BST
-	}
+	
+	
+	public void rankingRetrieval(String query) {
+        if (tree.empty()) {
+            System.out.println("Error: BST is empty. Cannot process query.");
+            return;
+        }
+    
+        String[] queryTerms = query.split(" "); 
+        LinkedList<String> rankingList = new LinkedList<>(); 
+    
+    
+        traverseAndRank(tree.root, queryTerms, rankingList);
+    
+        if (rankingList.empty()) {
+            System.out.println("No matching documents found.");
+            return;
+        }
+    
+        LinkedList<String> sortedList = rankingList.mergeSort(); // 
+        System.out.println("DocID\tScore");
+        sortedList.findFirst();
+        while (true) {
+            System.out.println(sortedList.retrieve() + "\t" + sortedList.retrieveScore());
+            if (sortedList.last()) break;
+            sortedList.findNext();
+        }
+    }
+    
+    private void traverseAndRank(BSTNode<String> node, String[] queryTerms, LinkedList<String> rankingList) {
+        if (node == null) return;
+    
+        // Visit the left subtree
+        traverseAndRank(node.left, queryTerms, rankingList);
+    
+        // Process the current node
+    
+        boolean isQueryWord = false;
+        for (String term : queryTerms) {
+            if (node.word.equalsIgnoreCase(term)) {
+                isQueryWord = true;
+                break;
+            }
+        }
+    
+        if (isQueryWord) {
+            LinkedList<String> ids = node.IDS; 
+            ids.findFirst();
+            while (true) {
+                String docID = ids.retrieve();
+                if (docID == null) {
+                    System.out.println("Error: Null document ID encountered. Skipping...");
+                } else {
+    
+                    boolean docFound = false;
+                    rankingList.findFirst();
+                    while (!rankingList.empty() && !rankingList.last()) {
+                        if (rankingList.retrieve().equals(docID)) {
+                            rankingList.addScore(1); // Increment the score
+                            docFound = true;
+                            break;
+                        }
+                        rankingList.findNext();
+                    }
+    
+                    if (!docFound && !rankingList.empty() && rankingList.retrieve().equals(docID)) {
+                        rankingList.addScore(1);
+                        docFound = true;
+                    }
+    
+                    if (!docFound) {
+                        rankingList.insert(docID);
+                        rankingList.addScore(1);
+                    }
+                }
+    
+                if (ids.last()) break;
+                ids.findNext();
+            }
+        }
+    
+        // Visit the right subtree
+        traverseAndRank(node.right, queryTerms, rankingList);
+    }
 
-	// Helper method for recursive in-order traversal
-	private void printTree(BSTNode<String> node) {
-	    if (node == null) {
-	        return;
-	    }
-	    // Visit the left subtree
-	    printTree(node.left);
-
-	    // Print the current node
-	    System.out.print("Word: " + node.word + " -> Document IDs: ");
-	    LinkedList<String> ids = node.IDS;
-	    ids.findFirst();
-	    while (!ids.last()) {
-	        System.out.print(ids.retrieve() + ", ");
-	        ids.findNext();
-	    }
-	    // Print the last ID
-	    System.out.println(ids.retrieve());
-
-	    // Visit the right subtree
-	    printTree(node.right);
-	}
 }

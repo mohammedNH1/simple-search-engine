@@ -44,13 +44,13 @@ public class BST <T> {
 		BSTNode<T> p, q = current;
 		
 		if(findkey(k)) {
-			current = q;  // findkey() modified current
-			return false; // word already in the BST
+			current = q; 
+			return false; 
 		}
 		
 		p = new BSTNode<T>(k, val);
 		if (empty()) {
-			root = current = p; // dont modify
+			root = current = p; 
 			return true;
 		}
 		else {
